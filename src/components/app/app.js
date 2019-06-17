@@ -133,7 +133,7 @@ class App extends React.Component {
         const todoCount = todoData.length - doneCount;
 
         return (
-            <div className="todo-app">
+            <div className="todo-app border border-secondary">
                 <AppHeader toDo={todoCount} done={doneCount}/>
                 <div className="top-panel d-flex">
                     <SearchPanel

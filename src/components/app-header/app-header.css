@@ -1,12 +1,22 @@
 .app-header {
     align-items: flex-end;
+    background-color: #4682B4;
+    position: relative;
+    width: 100%;
+    top: 0;
+    left: 0;
+
+
 }
 
 .app-header h1 {
     flex-grow: 1;
+    color: white;
+    padding-left: 1rem;
 }
 
 .app-header h2 {
     font-size: 1.2rem;
-    color: grey;
+    color: white;
+    padding-right: 1rem;
 }

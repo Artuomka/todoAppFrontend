@@ -35,11 +35,11 @@ class ItemAddForm extends React.Component {
                 <input type="text"
                        className="form-control"
                        onChange={this.onLabelChange}
-                       placeholder="What needs to be done?"
+                       placeholder="Start typing to create task"
                        value={this.state.label}
                 />
-                <button className="btn btn-outline-secondary"
-                >Add Item
+                <button className="btn btn-success"
+                >Add Task
                 </button>
             </form>
         );

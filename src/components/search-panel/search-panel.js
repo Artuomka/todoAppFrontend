@@ -17,7 +17,7 @@ class SearchPanel extends React.Component {
         return (
             <input type="text"
                    className="form-control search-input"
-                   placeholder="type to search"
+                   placeholder="Start typing to search task"
                    value={this.state.term}
                    onChange={this.onSearchChange}
 

@@ -1,38 +1,95 @@
 import React from 'react';
-
+import io from 'socket.io-client';
 import AppHeader from '../app-header';
 import SearchPanel from '../search-panel';
 import TodoList from '../todo-list';
 import ItemStatusFilter from '../item-status-filter';
 import ItemAddForm from '../item-add-form';
-
 import './app.css';
+
+let socket = io('http://localhost:80');
+
 
 class App extends React.Component {
 
-    maxId = 100;
+
+    maxId = 0;
 
     state = {
         todoData: [
-            this.createTodoItem('Byu a milk'),
-            this.createTodoItem('Call Mam'),
-            this.createTodoItem('Have a lunch'),
-
+            ''
         ],
         term: '',
         filter: 'all' //all, active, done
     };
 
+    //****************************************************************************
+
+    setDataOnConnection(items) {
+        let newItemsArray = [];
+        for (let i = 0; i < items.length; i++) {
+            const label        = items[i].label;
+            const newImportant = items[i].important;
+            const newDone      = items[i].done;
+            const newId        = items[i].id;
+            let newItem        = {
+                label,
+                important: newImportant,
+                done: newDone,
+                id: newId
+            };
+            newItemsArray.push(newItem);
+            this.maxId = newItemsArray.length;
+        }
+
+        this.setState(() => {
+            return {
+                todoData: newItemsArray
+            };
+        });
+    }
+
+
+    componentDidMount() {
+        socket.on('connect', socket => {
+            console.log('Connection to socket.io emitted');
+        });
+
+        socket.on('setItems', items => {
+            console.log('Set Items Emitted ' + JSON.stringify(items));
+            this.setDataOnConnection(items);
+        });
+
+    };
+
+    eventEmit(event, data) {
+        socket.emit(event, data);
+    };
+
+
+    //***************************************************************************
+
     createTodoItem(label) {
+        const newItem = {
+            label,
+            important: false,
+            done: false,
+            id: this.maxId
+        };
+        //console.log('')
+        this.eventEmit('createTodoItem', newItem);
+
         return {
             label,
             important: false,
             done: false,
             id: this.maxId++
         };
+
     };
 
     deleteItem = (id) => {
+        console.log(id);
         this.setState(({todoData}) => {
             const idx      = todoData.findIndex((el) => el.id === id);
             const before   = todoData.slice(0, idx);
@@ -43,6 +100,7 @@ class App extends React.Component {
                 todoData: newArray
             };
         });
+        this.eventEmit('deleteItem', id);
     };
 
     addItem = (text) => {
@@ -70,6 +128,7 @@ class App extends React.Component {
             }
 
         });
+        this.eventEmit('onToggleImportant', id);
     };
 
     onToggleDone = (id) => {
@@ -87,6 +146,7 @@ class App extends React.Component {
 
         });
         //      console.log('Toggle done ', id);
+        this.eventEmit('onToggleDone', id);
     };
 
     search(items, term) {
@@ -122,7 +182,7 @@ class App extends React.Component {
             default:
                 return items;
         }
-        ;
+
     };
 
     render() {
@@ -133,6 +193,7 @@ class App extends React.Component {
         const todoCount = todoData.length - doneCount;
 
         return (
+
             <div className="todo-app border border-secondary">
                 <AppHeader toDo={todoCount} done={doneCount}/>
                 <div className="top-panel d-flex">

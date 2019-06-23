@@ -7,7 +7,7 @@ import ItemStatusFilter from '../item-status-filter';
 import ItemAddForm from '../item-add-form';
 import './app.css';
 
-let socket = io('http://localhost:80');
+let socket = io('http://localhost:9000');
 
 
 class App extends React.Component {
@@ -17,7 +17,7 @@ class App extends React.Component {
 
     state = {
         todoData: [
-            ''
+            'Data not loaded...'
         ],
         term: '',
         filter: 'all' //all, active, done

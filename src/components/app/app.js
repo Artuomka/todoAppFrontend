@@ -1,221 +1,126 @@
 import React from 'react';
-import io from 'socket.io-client';
-import AppHeader from '../app-header';
-import SearchPanel from '../search-panel';
-import TodoList from '../todo-list';
-import ItemStatusFilter from '../item-status-filter';
-import ItemAddForm from '../item-add-form';
+import ProjectList from '../project-list';
 import './app.css';
 
-let socket = io('http://localhost:9000');
-
-
 class App extends React.Component {
+    listCount = 2;
 
-
-    maxId = 0;
-
-    state = {
-        todoData: [
-            'Data not loaded...'
-        ],
-        term: '',
-        filter: 'all' //all, active, done
+    state ={
+        listData: [
+            {listName: 'Todo List 1', listID: 1},
+            {listName: 'Todo List 2', listID: 2},
+        ]
     };
 
-    //****************************************************************************
-
-    setDataOnConnection(items) {
-        let newItemsArray = [];
-        for (let i = 0; i < items.length; i++) {
-            const label        = items[i].label;
-            const newImportant = items[i].important;
-            const newDone      = items[i].done;
-            const newId        = items[i].id;
-            let newItem        = {
-                label,
-                important: newImportant,
-                done: newDone,
-                id: newId
-            };
-            newItemsArray.push(newItem);
-            this.maxId = newItemsArray.length;
-        }
-
-        this.setState(() => {
+    onListAdd = () => {
+       const newItem = this.createProjectListItem(++this.listCount);
+       if (newItem===undefined){
+           return;
+       }
+       this.setState(({listData}) => {
+            const newArray = [...listData, newItem];
             return {
-                todoData: newItemsArray
-            };
-        });
-    }
-
-
-    componentDidMount() {
-        socket.on('connect', socket => {
-            console.log('Connection to socket.io emitted');
-        });
-
-        socket.on('setItems', items => {
-            console.log('Set Items Emitted ' + JSON.stringify(items));
-            this.setDataOnConnection(items);
-        });
-
+                listData: newArray
+            }
+       });
     };
 
-    eventEmit(event, data) {
-        socket.emit(event, data);
-    };
-
-
-    //***************************************************************************
-
-    createTodoItem(label) {
+    createProjectListItem = (listCount) => {
+        const newItemName = prompt("Enter the new project name (not more 14 characters long)");
+        if (newItemName===null){
+            return;
+        }
+        if (newItemName.trim().length===0){
+            alert("Project name cannot be empty!");
+            return;
+        }
+        if (newItemName.trim().length>14){
+            alert("Project name is to long. It must be not more than 14 characters.");
+            return;
+        }
         const newItem = {
-            label,
-            important: false,
-            done: false,
-            id: this.maxId
+            listName: newItemName.trim(),
+            listID: listCount
         };
-        //console.log('')
-        this.eventEmit('createTodoItem', newItem);
-
-        return {
-            label,
-            important: false,
-            done: false,
-            id: this.maxId++
-        };
-
+        return newItem;
     };
 
-    deleteItem = (id) => {
-        console.log(id);
-        this.setState(({todoData}) => {
-            const idx      = todoData.findIndex((el) => el.id === id);
-            const before   = todoData.slice(0, idx);
-            const after    = todoData.slice(idx + 1);
+    onProjectDeleted = (listID) => {
+        this.setState(({listData}) => {
+            const idx      = listData.findIndex((el) => el.listID === listID);
+            const before   = listData.slice(0, idx);
+            const after    = listData.slice(idx + 1);
             const newArray = [...before, ...after];
 
             return {
-                todoData: newArray
+                listData: newArray
             };
         });
-        this.eventEmit('deleteItem', id);
+       // this.eventEmit('deleteProject', listID);
     };
 
-    addItem = (text) => {
-        const newItem = this.createTodoItem(text);
-
-        this.setState(({todoData}) => {
-            const newArray = [...todoData, newItem];
-            return {
-                todoData: newArray
+    onProjectEdited = (listID) => {
+        this.setState(({listData}) => {
+            const idx      = listData.findIndex((el) => el.listID === listID);
+            const newItemName = prompt("Enter new list name. (not more 14 characters long)");
+            if (newItemName===null){
+                return;
             }
-        });
-    };
-
-    onToggleImportant = (id) => {
-        this.setState(({todoData}) => {
-            const idx      = todoData.findIndex((el) => el.id === id);
-            const oldItem  = todoData[idx];
-            const newItem  = {...oldItem, important: !oldItem.important};
-            const before   = todoData.slice(0, idx);
-            const after    = todoData.slice(idx + 1);
-            const newArray = [...before, newItem, ...after];
-
-            return {
-                todoData: newArray
+            if (newItemName.trim().length===0){
+                alert("Project name cannot be empty!");
+                return;
             }
-
-        });
-        this.eventEmit('onToggleImportant', id);
-    };
-
-    onToggleDone = (id) => {
-        this.setState(({todoData}) => {
-            const idx      = todoData.findIndex((el) => el.id === id);
-            const oldItem  = todoData[idx];
-            const newItem  = {...oldItem, done: !oldItem.done};
-            const before   = todoData.slice(0, idx);
-            const after    = todoData.slice(idx + 1);
-            const newArray = [...before, newItem, ...after];
-
-            return {
-                todoData: newArray
+            if (newItemName.trim().length>14){
+                alert("Project name is to long. It must be not more than 14 characters.");
+                return;
             }
-
+            let tmpItem = listData[idx];
+            tmpItem.listName = newItemName;
+            const newListItem = tmpItem;
+            let newArray = listData;
+            newArray[idx] = newListItem;
+            return {
+                listData: newArray
+            };
         });
-        //      console.log('Toggle done ', id);
-        this.eventEmit('onToggleDone', id);
-    };
-
-    search(items, term) {
-        if (term.length === 0) {
-            return items;
-        }
-
-        return items.filter((item) => {
-            return item.label.toLowerCase().indexOf(term.toLowerCase()) > -1;
-        });
-    };
-
-    onSearchChange = (term) => {
-        this.setState({term});
-    };
-
-    onFilterChange = (filter) => {
-        this.setState({filter});
-    };
-
-
-    filter(items, filter) {
-        switch (filter) {
-            case 'all':
-                return items;
-
-            case 'active':
-                return items.filter((item) => !item.done);
-
-            case 'done':
-                return items.filter((item) => item.done);
-
-            default:
-                return items;
-        }
-
     };
 
     render() {
-        const {todoData, term, filter} = this.state;
-        const visibleItems             = this.filter(this.search(todoData, term), filter);
+        const elements = this.state.listData.map((item)=>{
+            const {listID, listName, onProjectDeleted, onProjectEdited} = item;
 
-        const doneCount = todoData.filter((el) => el.done).length;
-        const todoCount = todoData.length - doneCount;
+            return(
+                <li key={listID} className="project-list-item">
+                    <ProjectList
+                                listID={listID}
+                                header={listName}
+                                onProjectDeleted={()=>this.onProjectDeleted(listID)}
+                                onProjectEdited={()=>this.onProjectEdited(listID)}
+                    />
+                </li>
+            );
+        });
 
         return (
+            <div>
+                <div className='head-text'>SIMPLE TODO LISTS</div>
 
-            <div className="todo-app border border-secondary">
-                <AppHeader toDo={todoCount} done={doneCount}/>
-                <div className="top-panel d-flex">
-                    <SearchPanel
-                        onSearchChange={this.onSearchChange}
-                    />
-                    <ItemStatusFilter filter={filter}
-                                      onFilterChange={this.onFilterChange}
+                <ul>
+                    { elements }
+                </ul>
 
-                    />
+                <div className="btn-container">
+                    <button type="button"
+                            id="btnListAdd"
+                            className="btn btn-primary btn-lg"
+                            onClick={this.onListAdd}
+                    >
+                        Add TODO List
+                    </button>
                 </div>
-
-                <TodoList todos={visibleItems}
-                          onDeleted={this.deleteItem}
-
-                          onToggleImportant={this.onToggleImportant}
-                          onToggleDone={this.onToggleDone}
-                />
-                <ItemAddForm onItemAdded={this.addItem}/>
             </div>
         );
     }
-};
+}
 
 export default App;

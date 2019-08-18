@@ -1,20 +1,22 @@
-.todo-app {
-    margin: 2rem auto 0 auto;
-    padding-bottom: 1rem;
-    max-width: 60%;
-    background: white;
-    border-bottom-left-radius: 20px;
-    border-bottom-right-radius: 20px;
-}
-
-.top-panel {
-    margin: 1rem 0;
-}
-
-html {
-    min-height: 100%;
-}
-
 body {
     background: linear-gradient(to bottom, lightgray, lightyellow, orange, darkorange);
+}
+
+.head-text {
+    text-align: center;
+    font-size: 30px;
+    font-family: 'Roboto', sans-serif;
+}
+
+.btn-container{
+    text-align: center;
+}
+
+#btnListAdd {
+    margin-top: 40px;
+    margin-bottom: 30px;
+}
+
+.project-list-item {
+    list-style-type: none;
 }

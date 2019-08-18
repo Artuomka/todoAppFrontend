@@ -10,6 +10,8 @@
 }
 
 .app-header h1 {
+    padding: 5px;
+    font-size: 35px;
     flex-grow: 1;
     color: white;
     padding-left: 1rem;
@@ -19,4 +21,7 @@
     font-size: 1.2rem;
     color: white;
     padding-right: 1rem;
+}
+.btn-outline-light {
+    margin: 6px;
 }

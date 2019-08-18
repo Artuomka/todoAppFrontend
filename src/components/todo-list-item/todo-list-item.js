@@ -27,9 +27,9 @@ class TodoListItem extends React.Component {
   */
 
     render() {
-        const {label, onDeleted, onToggleImportant, onToggleDone, important, done} = this.props;
+        const {label, onDeleted, onEdited, onToggleImportant, onToggleDone, important, done} = this.props;
         // const {done, important} = this.state;
-        let classNames                                                             = "todo-list-item";
+        let classNames = "todo-list-item";
 
         if (done) {
             classNames += " done";
@@ -54,6 +54,13 @@ class TodoListItem extends React.Component {
               onClick={onDeleted}
       >
         <i className="fa fa-trash-o"/>
+      </button>
+
+      <button type="button"
+                 className="btn btn-outline-secondary btn-sm float-right"
+                 onClick={onEdited}
+         >
+        <i className="fa fa-pencil"/>
       </button>
 
        <button type="button"

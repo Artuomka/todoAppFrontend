@@ -16,10 +16,10 @@ class ProjectList extends React.Component {
 
     state = {
         todoData: [
-            {label: 'Buy a milk', imortant: false, done: false, id: 0},
-            {label: 'Call mam', imortant: false, done: false, id: 1},
-            {label: 'Clean the Room', imortant: false, done: false, id: 2},
-            {label: 'Repair DVD Player', imortant: false, done: false, id: 3}
+            //{label: 'Buy a milk', imortant: false, done: false, id: 0},
+            // {label: 'Call mam', imortant: false, done: false, id: 1},
+            // {label: 'Clean the Room', imortant: false, done: false, id: 2},
+            // {label: 'Repair DVD Player', imortant: false, done: false, id: 3}
         ],
         term: '',
         filter: 'all' //all, active, done
@@ -67,8 +67,6 @@ class ProjectList extends React.Component {
         socket.emit(event, data);
     };
 
-    //***************************************************************************
-
     createTodoItem(label) {
         const newItem = {
             label,
@@ -76,7 +74,6 @@ class ProjectList extends React.Component {
             done: false,
             id: this.maxId
         };
-        //console.log('')
         this.eventEmit('createTodoItem', newItem);
 
         return {
@@ -104,7 +101,6 @@ class ProjectList extends React.Component {
 
     addItem = (text) => {
         const newItem = this.createTodoItem(text);
-
         this.setState(({todoData}) => {
             const newArray = [...todoData, newItem];
             return {
@@ -133,9 +129,8 @@ class ProjectList extends React.Component {
             return {
                 todoData: newArray
             }
-
         });
-        this.eventEmit('onToggleImportant', id);
+        this.eventEmit('', id);
     };
 
     onToggleImportant = (id) => {
@@ -150,7 +145,6 @@ class ProjectList extends React.Component {
             return {
                 todoData: newArray
             }
-
         });
         this.eventEmit('onToggleImportant', id);
     };
@@ -169,8 +163,51 @@ class ProjectList extends React.Component {
             }
 
         });
-        //      console.log('Toggle done ', id);
         this.eventEmit('onToggleDone', id);
+    };
+
+    onToggleDown = (id) =>{
+        this.setState(({todoData}) => {
+            const idx      = todoData.findIndex((el) => el.id === id);
+            if (idx >= todoData.length-1) {
+                alert("This item has lowest priority!");
+                return;
+            }
+            const oldItem  = todoData[idx];
+            const newItem  = todoData[idx+1];
+            todoData[idx] = newItem;
+            todoData[idx+1] = oldItem;
+            const before   = todoData.slice(0, idx);
+            const after    = todoData.slice(idx + 1);
+            const newArray = [...before, newItem, ...after];
+            return {
+                todoData: newArray
+            }
+
+        });
+        this.eventEmit('onToggleDown', id);
+    };
+
+    onToggleUp = (id) =>{
+        this.setState(({todoData}) => {
+            const idx      = todoData.findIndex((el) => el.id === id);
+            if (idx <= 0) {
+                alert("This item has highest priority!");
+                return;
+            }
+            const oldItem  = todoData[idx];
+            const newItem  = todoData[idx-1];
+            todoData[idx] = newItem;
+            todoData[idx-1] = oldItem;
+            const before   = todoData.slice(0, idx);
+            const after    = todoData.slice(idx + 1);
+            const newArray = [...before, newItem, ...after];
+            return {
+                todoData: newArray
+            }
+
+        });
+        this.eventEmit('onToggleUp', id);
     };
 
     search(items, term) {
@@ -205,26 +242,24 @@ class ProjectList extends React.Component {
             default:
                 return items;
         }
-
     };
 
     render() {
         const {todoData, term, filter} = this.state;
         const visibleItems             = this.filter(this.search(todoData, term), filter);
-        const {header, onProjectDeleted, onProjectEdited} = this.props;
+        const {header, onProjectDeleted, onProjectEdited, onDateEdited} = this.props;
 
         const doneCount = todoData.filter((el) => el.done).length;
         const todoCount = todoData.length - doneCount;
 
         return (
-
             <div className="project-list border border-secondary">
                 <ProjectListHeader toDo={todoCount}
                                    done={doneCount}
                                    header={header}
                                    onProjectDeleted = {onProjectDeleted}
                                    onProjectEdited = {onProjectEdited}
-
+                                   onDateEdited = {onDateEdited}
                 />
                 <div className="top-panel d-flex">
                     <SearchPanel
@@ -240,11 +275,13 @@ class ProjectList extends React.Component {
                           onEdited = {this.editItem}
                           onToggleImportant={this.onToggleImportant}
                           onToggleDone={this.onToggleDone}
+                          onToggleDown={this.onToggleDown}
+                          onToggleUp={this.onToggleUp}
                 />
                 <ItemAddForm onItemAdded={this.addItem}/>
             </div>
         );
     }
-};
+}
 
 export default ProjectList;

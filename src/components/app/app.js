@@ -1,15 +1,54 @@
 import React from 'react';
 import ProjectList from '../project-list';
 import './app.css';
+import io from "socket.io-client";
+
+let socket = io('http://localhost:9000');
 
 class App extends React.Component {
-    listCount = 2;
+    listCount = 0;
 
     state ={
         listData: [
-            {listName: 'Todo List 1', listID: 1},
-            {listName: 'Todo List 2', listID: 2},
+            // {listName: 'Todo List 1', listID: 1},
+            // {listName: 'Todo List 2', listID: 2},
         ]
+    };
+
+    componentDidMount() {
+        socket.on('connect', socket => {
+            console.log('Connection to socket.io emitted');
+        });
+
+        this.eventEmit('getProjects');
+
+        socket.on('setProjects', items => {
+            console.log('Set Items Emitted ' + JSON.stringify(items));
+            this.setProjectsOnConnection(items);
+        });
+
+    };
+
+    setProjectsOnConnection(items) {
+        let newItemsArray = [];
+        for (let i = 0; i < items.length; i++) {
+            let newItem        = {
+                listName: items[i].listName,
+                listID: items[i].listID
+            };
+            newItemsArray.push(newItem);
+            this.listCount = newItemsArray.length;
+        }
+
+        this.setState(() => {
+            return {
+                listData: newItemsArray
+            };
+        });
+    }
+
+    eventEmit(event, data) {
+        socket.emit(event, data);
     };
 
     onListAdd = () => {
@@ -23,6 +62,7 @@ class App extends React.Component {
                 listData: newArray
             }
        });
+        this.eventEmit('onListAdd', newItem);
     };
 
     createProjectListItem = (listCount) => {
@@ -56,10 +96,11 @@ class App extends React.Component {
                 listData: newArray
             };
         });
-       // this.eventEmit('deleteProject', listID);
+        this.eventEmit('onProjectDeleted', listID);
     };
 
     onProjectEdited = (listID) => {
+        let editedProjectData = null;
         this.setState(({listData}) => {
             const idx      = listData.findIndex((el) => el.listID === listID);
             const newItemName = prompt("Enter new list name. (not more 14 characters long)");
@@ -79,15 +120,26 @@ class App extends React.Component {
             const newListItem = tmpItem;
             let newArray = listData;
             newArray[idx] = newListItem;
+            editedProjectData = {
+                listName: newItemName,
+                listID: listID
+            };
             return {
                 listData: newArray
             };
         });
+        if (editedProjectData != null) {
+            this.eventEmit('onProjectEdited', editedProjectData);
+        }
+    };
+// TODO realise datepicker
+    onDateEdited = (listID) => {
+        alert('LIST DATE EDIT CALLED!');
     };
 
     render() {
         const elements = this.state.listData.map((item)=>{
-            const {listID, listName, onProjectDeleted, onProjectEdited} = item;
+            const {listID, listName, onProjectDeleted, onProjectEdited, onDateEdited} = item;
 
             return(
                 <li key={listID} className="project-list-item">
@@ -96,6 +148,7 @@ class App extends React.Component {
                                 header={listName}
                                 onProjectDeleted={()=>this.onProjectDeleted(listID)}
                                 onProjectEdited={()=>this.onProjectEdited(listID)}
+                                onDateEdited={()=>this.onDateEdited(listID)}
                     />
                 </li>
             );

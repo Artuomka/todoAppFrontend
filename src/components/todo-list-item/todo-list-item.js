@@ -9,25 +9,18 @@ class TodoListItem extends React.Component {
         important: false
     };
 
-    /*  onLabelClick = () => {
-          this.setState((state) => {
-              return {
-                  done: !state.done
-              }
-          });
-      };
-
-      onMarkImportant = () => {
-          this.setState((state) => {
-              return {
-                  important: !state.important
-              };
-          });
-      };
-  */
-
     render() {
-        const {label, onDeleted, onEdited, onToggleImportant, onToggleDone, important, done} = this.props;
+        const {
+                  label,
+                  onDeleted,
+                  onEdited,
+                  onToggleImportant,
+                  onToggleDone,
+                  onToggleDown,
+                  onToggleUp,
+                  important,
+                  done
+              }        = this.props;
         // const {done, important} = this.state;
         let classNames = "todo-list-item";
 
@@ -57,9 +50,9 @@ class TodoListItem extends React.Component {
       </button>
 
       <button type="button"
-                 className="btn btn-outline-secondary btn-sm float-right"
-                 onClick={onEdited}
-         >
+              className="btn btn-outline-secondary btn-sm float-right"
+              onClick={onEdited}
+      >
         <i className="fa fa-pencil"/>
       </button>
 
@@ -69,7 +62,21 @@ class TodoListItem extends React.Component {
        >
         <i className="fa fa-exclamation"/>
       </button>
+       {/***********************************/}
+                <button type="button"
+                        className="btn btn-outline-dark btn-sm float-right"
+                        onClick={onToggleDown}
+                >
+                <i className="fa fa-arrow-down"/>
+                </button>
 
+                <button type="button"
+                        className="btn btn-outline-dark btn-sm float-right"
+                        onClick={onToggleUp}
+                >
+                <i className="fa fa-arrow-up"/>
+                </button>
+       {/***********************************/}
     </span>
         );
     };

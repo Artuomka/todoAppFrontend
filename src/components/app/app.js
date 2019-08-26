@@ -135,7 +135,8 @@ class App extends React.Component {
     };
 
     onListChanged = (todoData, listID) => {
-        console.log("LIST CHANGED ->"+ JSON.stringify(todoData)+"listID = " +listID);
+
+        console.log("LIST CHANGED ->"+ JSON.stringify(todoData));
         const changeData = {
             todoData: todoData,
             listID: listID
@@ -150,6 +151,7 @@ class App extends React.Component {
                       listName,
                       todoData,
                   } = item;
+            console.log(JSON.stringify(todoData));
 
             return (
                 <li key={listID} className="project-list-item">
@@ -160,7 +162,7 @@ class App extends React.Component {
                         onProjectDeleted={() => this.onProjectDeleted(listID)}
                         onProjectEdited={() => this.onProjectEdited(listID)}
                         onDateEdited={() => this.onDateEdited(listID)}
-                        onListChanged ={()=>this.onListChanged(todoData, listID)}
+                        onListChanged = {this.onListChanged}
                     />
                 </li>
             );

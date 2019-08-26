@@ -8,7 +8,7 @@ import './project-list.css';
 
 class ProjectList extends React.Component {
     listID = this.props;
-    onListChanged;
+    onListChanged = this.props.onListChanged;
     todoData = this.props.todoData;
 
     maxId = 0;
@@ -21,8 +21,6 @@ class ProjectList extends React.Component {
     };
 
     componentDidMount() {
-        const onListChanged = this.props.onListChanged;
-        this.onListChanged = onListChanged;
         this.setState(() => {
             const newArray = this.todoData;
             return {
@@ -103,7 +101,6 @@ class ProjectList extends React.Component {
             const before   = todoData.slice(0, idx);
             const after    = todoData.slice(idx + 1);
             const newArray = [...before, newItem, ...after];
-            console.log('SENDING ARRAY' +JSON.stringify(newArray));
             this.onListChanged(newArray, this.listID);
             return {
                 todoData: newArray

@@ -1,5 +1,4 @@
 import React from 'react';
-import io from 'socket.io-client';
 import ProjectListHeader from '../project-list-header';
 import SearchPanel from '../search-panel';
 import TodoList from '../todo-list';
@@ -7,64 +6,29 @@ import ItemStatusFilter from '../item-status-filter';
 import ItemAddForm from '../item-add-form';
 import './project-list.css';
 
-let socket = io('http://localhost:9000');
-
-
 class ProjectList extends React.Component {
+    listID = this.props;
+    onListChanged;
+    todoData = this.props.todoData;
 
     maxId = 0;
 
     state = {
-        todoData: [
-            //{label: 'Buy a milk', imortant: false, done: false, id: 0},
-            // {label: 'Call mam', imortant: false, done: false, id: 1},
-            // {label: 'Clean the Room', imortant: false, done: false, id: 2},
-            // {label: 'Repair DVD Player', imortant: false, done: false, id: 3}
-        ],
+        todoData:
+             [],
         term: '',
         filter: 'all' //all, active, done
     };
 
-    //****************************************************************************
-
-    setDataOnConnection(items) {
-        let newItemsArray = [];
-        for (let i = 0; i < items.length; i++) {
-            const label        = items[i].label;
-            const newImportant = items[i].important;
-            const newDone      = items[i].done;
-            const newId        = items[i].id;
-            let newItem        = {
-                label,
-                important: newImportant,
-                done: newDone,
-                id: newId
-            };
-            newItemsArray.push(newItem);
-            this.maxId = newItemsArray.length;
-        }
-
-        this.setState(() => {
-            return {
-                todoData: newItemsArray
-            };
-        });
-    }
-
     componentDidMount() {
-        socket.on('connect', socket => {
-            console.log('Connection to socket.io emitted');
+        const onListChanged = this.props.onListChanged;
+        this.onListChanged = onListChanged;
+        this.setState(() => {
+            const newArray = this.todoData;
+            return {
+                todoData: newArray
+            }
         });
-
-        socket.on('setItems', items => {
-            console.log('Set Items Emitted ' + JSON.stringify(items));
-            this.setDataOnConnection(items);
-        });
-
-    };
-
-    eventEmit(event, data) {
-        socket.emit(event, data);
     };
 
     createTodoItem(label) {
@@ -74,7 +38,6 @@ class ProjectList extends React.Component {
             done: false,
             id: this.maxId
         };
-        this.eventEmit('createTodoItem', newItem);
 
         return {
             label,
@@ -91,18 +54,18 @@ class ProjectList extends React.Component {
             const before   = todoData.slice(0, idx);
             const after    = todoData.slice(idx + 1);
             const newArray = [...before, ...after];
-
+            this.onListChanged(newArray, this.listID);
             return {
                 todoData: newArray
             };
         });
-        this.eventEmit('deleteItem', id);
     };
 
     addItem = (text) => {
         const newItem = this.createTodoItem(text);
         this.setState(({todoData}) => {
             const newArray = [...todoData, newItem];
+            this.onListChanged(newArray, this.listID);
             return {
                 todoData: newArray
             }
@@ -125,12 +88,11 @@ class ProjectList extends React.Component {
             const before   = todoData.slice(0, idx);
             const after    = todoData.slice(idx + 1);
             const newArray = [...before, newItem, ...after];
-
+            this.onListChanged(newArray, this.listID);
             return {
                 todoData: newArray
             }
         });
-        this.eventEmit('', id);
     };
 
     onToggleImportant = (id) => {
@@ -141,12 +103,12 @@ class ProjectList extends React.Component {
             const before   = todoData.slice(0, idx);
             const after    = todoData.slice(idx + 1);
             const newArray = [...before, newItem, ...after];
-
+            console.log('SENDING ARRAY' +JSON.stringify(newArray));
+            this.onListChanged(newArray, this.listID);
             return {
                 todoData: newArray
             }
         });
-        this.eventEmit('onToggleImportant', id);
     };
 
     onToggleDone = (id) => {
@@ -157,13 +119,11 @@ class ProjectList extends React.Component {
             const before   = todoData.slice(0, idx);
             const after    = todoData.slice(idx + 1);
             const newArray = [...before, newItem, ...after];
-
+            this.onListChanged(newArray, this.listID);
             return {
                 todoData: newArray
             }
-
         });
-        this.eventEmit('onToggleDone', id);
     };
 
     onToggleDown = (id) =>{
@@ -180,12 +140,11 @@ class ProjectList extends React.Component {
             const before   = todoData.slice(0, idx);
             const after    = todoData.slice(idx + 1);
             const newArray = [...before, newItem, ...after];
+            this.onListChanged(newArray, this.listID);
             return {
                 todoData: newArray
             }
-
         });
-        this.eventEmit('onToggleDown', id);
     };
 
     onToggleUp = (id) =>{
@@ -202,12 +161,11 @@ class ProjectList extends React.Component {
             const before   = todoData.slice(0, idx);
             const after    = todoData.slice(idx + 1);
             const newArray = [...before, newItem, ...after];
+            this.onListChanged(newArray, this.listID);
             return {
                 todoData: newArray
             }
-
         });
-        this.eventEmit('onToggleUp', id);
     };
 
     search(items, term) {

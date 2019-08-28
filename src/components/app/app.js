@@ -23,6 +23,11 @@ class App extends React.Component {
             console.log('Set Projects Emitted ' + JSON.stringify(items));
             this.setProjectsOnConnection(items);
         });
+
+        socket.on('setNewListItem', async (item) =>{
+            console.log('set new list Item Emitted with' +JSON.stringify(item));
+           await this.setNewListItem(item);
+        });
     };
 
     setProjectsOnConnection(items) {
@@ -44,6 +49,15 @@ class App extends React.Component {
         });
     }
 
+    setNewListItem(newItem){
+        this.setState(({listData}) => {
+            const newArray = [...listData, newItem];
+            return {
+                listData: newArray
+            }
+        });
+    };
+
     eventEmit(event, data) {
         socket.emit(event, data);
     };
@@ -53,12 +67,7 @@ class App extends React.Component {
         if (newItem === undefined) {
             return;
         }
-        this.setState(({listData}) => {
-            const newArray = [...listData, newItem];
-            return {
-                listData: newArray
-            }
-        });
+        console.log(JSON.stringify(newItem));
         this.eventEmit('onListAdd', newItem);
     };
 
@@ -77,7 +86,8 @@ class App extends React.Component {
         }
         const newItem = {
             listName: newItemName.trim(),
-            listID: listCount
+            listID: listCount,
+            todoData: []
         };
         return newItem;
     };
@@ -93,10 +103,12 @@ class App extends React.Component {
                 listData: newArray
             };
         });
+        console.log('Current ID of deleted list', listID)
         this.eventEmit('onProjectDeleted', listID);
     };
 
     onProjectEdited = (listID) => {
+        console.log('ListID for UPDATE >>>' +listID);
         let editedProjectData = null;
         this.setState(({listData}) => {
             const idx         = listData.findIndex((el) => el.listID === listID);
@@ -121,13 +133,13 @@ class App extends React.Component {
                 listName: newItemName,
                 listID: listID
             };
+            if (editedProjectData != null) {
+                this.eventEmit('onProjectEdited', editedProjectData);
+            }
             return {
                 listData: newArray
             };
         });
-        if (editedProjectData != null) {
-            this.eventEmit('onProjectEdited', editedProjectData);
-        }
     };
 // TODO realise datepicker
     onDateEdited    = (listID) => {
@@ -135,12 +147,11 @@ class App extends React.Component {
     };
 
     onListChanged = (todoData, listID) => {
-
-        console.log("LIST CHANGED ->"+ JSON.stringify(todoData));
         const changeData = {
             todoData: todoData,
             listID: listID
         };
+        console.log("ID of changed List" +listID);
         this.eventEmit('onListChanged', changeData);
     };
 

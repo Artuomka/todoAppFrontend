@@ -13,6 +13,10 @@ class ProjectList extends React.Component {
 
     maxId = 0;
 
+    newID(){
+        return '_' + Math.random().toString(36).substr(2, 9);
+    };
+
     state = {
         todoData:
              [],
@@ -30,18 +34,12 @@ class ProjectList extends React.Component {
     };
 
     createTodoItem(label) {
-        const newItem = {
-            label,
-            important: false,
-            done: false,
-            id: this.maxId
-        };
-
+        const newID = this.newID();
         return {
             label,
             important: false,
             done: false,
-            id: this.maxId++
+            id: newID
         };
     };
 

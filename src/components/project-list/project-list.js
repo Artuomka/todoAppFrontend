@@ -11,8 +11,6 @@ class ProjectList extends React.Component {
     onListChanged = this.props.onListChanged;
     todoData = this.props.todoData;
 
-    maxId = 0;
-
     newID(){
         return '_' + Math.random().toString(36).substr(2, 9);
     };
@@ -44,7 +42,6 @@ class ProjectList extends React.Component {
     };
 
     deleteItem = (id) => {
-        console.log(id);
         this.setState(({todoData}) => {
             const idx      = todoData.findIndex((el) => el.id === id);
             const before   = todoData.slice(0, idx);

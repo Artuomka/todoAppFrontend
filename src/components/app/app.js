@@ -14,19 +14,17 @@ class App extends React.Component {
 
     componentDidMount() {
         socket.on('connect', socket => {
-            console.log('Connection to socket.io emitted from app emitted');
+            console.log('Connection to socket.io emitted from app');
         });
 
         this.eventEmit('getProjects');
 
         socket.on('setProjects', items => {
-            console.log('Set Projects Emitted ' + JSON.stringify(items));
             this.setProjectsOnConnection(items);
         });
 
-        socket.on('setNewListItem', async (item) =>{
-            console.log('set new list Item Emitted with' +JSON.stringify(item));
-           await this.setNewListItem(item);
+        socket.on('setNewListItem', async (item) => {
+            await this.setNewListItem(item);
         });
     };
 
@@ -49,7 +47,7 @@ class App extends React.Component {
         });
     }
 
-    setNewListItem(newItem){
+    setNewListItem(newItem) {
         this.setState(({listData}) => {
             const newArray = [...listData, newItem];
             return {
@@ -67,7 +65,6 @@ class App extends React.Component {
         if (newItem === undefined) {
             return;
         }
-        console.log(JSON.stringify(newItem));
         this.eventEmit('onListAdd', newItem);
     };
 
@@ -103,12 +100,10 @@ class App extends React.Component {
                 listData: newArray
             };
         });
-        console.log('Current ID of deleted list', listID)
         this.eventEmit('onProjectDeleted', listID);
     };
 
     onProjectEdited = (listID) => {
-        console.log('ListID for UPDATE >>>' +listID);
         let editedProjectData = null;
         this.setState(({listData}) => {
             const idx         = listData.findIndex((el) => el.listID === listID);
@@ -151,7 +146,6 @@ class App extends React.Component {
             todoData: todoData,
             listID: listID
         };
-        console.log("ID of changed List" +listID);
         this.eventEmit('onListChanged', changeData);
     };
 
@@ -162,18 +156,17 @@ class App extends React.Component {
                       listName,
                       todoData,
                   } = item;
-            console.log(JSON.stringify(todoData));
 
             return (
                 <li key={listID} className="project-list-item">
                     <ProjectList
                         listID={listID}
                         header={listName}
-                        todoData ={todoData}
+                        todoData={todoData}
                         onProjectDeleted={() => this.onProjectDeleted(listID)}
                         onProjectEdited={() => this.onProjectEdited(listID)}
                         onDateEdited={() => this.onDateEdited(listID)}
-                        onListChanged = {this.onListChanged}
+                        onListChanged={this.onListChanged}
                     />
                 </li>
             );

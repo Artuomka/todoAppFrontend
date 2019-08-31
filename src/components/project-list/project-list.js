@@ -67,15 +67,17 @@ class ProjectList extends React.Component {
 
     editItem = (id) => {
         this.setState(({todoData}) => {
-            const newItemName = prompt("Enter new task name");
-            if (newItemName===null){
+            const idx      = todoData.findIndex((el) => el.id === id);
+            const phrase = "Change the name of your task";
+            const previousName = todoData[idx].label;
+            const newItemName = prompt(phrase, previousName);
+            if (newItemName===null || newItemName.trim()===previousName){
                 return;
             }
             if (newItemName.trim().length===0){
                 alert("Task name cannot be empty!");
                 return;
             }
-            const idx      = todoData.findIndex((el) => el.id === id);
             const oldItem  = todoData[idx];
             const newItem  = {...oldItem, label: newItemName};
             const before   = todoData.slice(0, idx);

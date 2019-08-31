@@ -3,7 +3,7 @@ import ProjectList from '../project-list';
 import './app.css';
 import io from "socket.io-client";
 
-let socket = io('http://localhost:9000');
+let socket = io('' + window.location);
 
 class App extends React.Component {
     listCount = 0;
@@ -90,6 +90,10 @@ class App extends React.Component {
     };
 
     onProjectDeleted = (listID) => {
+        const sure = window.confirm("Are you sure you want to delete the project?");
+        if (!sure) {
+            return;
+        }
         this.setState(({listData}) => {
             const idx      = listData.findIndex((el) => el.listID === listID);
             const before   = listData.slice(0, idx);
@@ -106,9 +110,13 @@ class App extends React.Component {
     onProjectEdited = (listID) => {
         let editedProjectData = null;
         this.setState(({listData}) => {
-            const idx         = listData.findIndex((el) => el.listID === listID);
-            const newItemName = prompt("Enter new list name. (not more 14 characters long)");
-            if (newItemName === null) {
+            const idx          = listData.findIndex((el) => el.listID === listID);
+            const phrase       = "Edit the name of your ToDo list. (not more 14 characters long)";
+            const previousName = listData[idx].listName;
+            const newItemName  = prompt(phrase, previousName);
+            if (newItemName === null
+                || newItemName === undefined
+                || newItemName.trim() === previousName) {
                 return;
             }
             if (newItemName.trim().length === 0) {
